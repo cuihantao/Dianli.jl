@@ -19,7 +19,7 @@ using .Routines
 using .BasicTypes
 
 export System
-export nr_eqn_cb, nr_update, nr_update!
+export nr_eqn_cb!, nr_update, nr_update!
 export convert
 
 end
