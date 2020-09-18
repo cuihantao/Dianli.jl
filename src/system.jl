@@ -2,10 +2,12 @@ module PowerSystem
 
 using ..BasicTypes
 using ..Models
+using ..Dian: THREAD_MODES
 using PyCall: PyObject
 using SparseArrays: SparseMatrixCSC, sparse
 
 import Base: convert
+import ..Models: set_v!, collect_g!
 
 export System
 export make_instance, convert
@@ -125,7 +127,7 @@ end
 """
 Model-serial g_update
 """
-function sg_update!(jss::System{T}, tflag::Type{Val{N}}) where {T<:AbstractFloat, N}
+function sg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     g_update!(jss.PQ, tflag)
     g_update!(jss.PV, tflag)
     g_update!(jss.Slack, tflag)
@@ -136,7 +138,7 @@ end
 """
 Model-parallel g_update
 """
-function pg_update!(models::Array{Model{T}}, tflag::Type{Val{N}}) where {T<:AbstractFloat, N}
+function pg_update!(models::Array{Model{T}}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     Threads.@threads for model in models
         @inbounds g_update!(model, tflag)
     end

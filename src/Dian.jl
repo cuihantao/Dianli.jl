@@ -9,6 +9,8 @@ using PyCall: PyObject
 
 import Base: convert
 
+THREAD_MODES = Union{Type{Val{:serial}}, Type{Val{:threaded}}}
+
 include("basics.jl")
 include("models/models.jl")
 include("system.jl")
@@ -19,7 +21,8 @@ using .Routines
 using .BasicTypes
 
 export System
-export nr_eqn_cb!, nr_update, nr_update!
+export nr_serial!, nr_threaded!
+export nr_cb_serial!, nr_cb_threaded!
 export convert
 
 end
