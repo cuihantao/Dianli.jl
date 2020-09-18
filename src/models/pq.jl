@@ -15,7 +15,7 @@ Base.@propagate_inbounds function g_update!(PQ::PQ{T}, ::Type{Val{:serial}}) whe
 end
 
 
-Base.@propagate_inbounds function g_update!(PQ::PQ{T}, ::Type{Val{:threads}}) where T<:AbstractFloat
+Base.@propagate_inbounds function g_update!(PQ::PQ{T}, ::Type{Val{:threaded}}) where T<:AbstractFloat
     Threads.@threads for i = 1:PQ.n
         @inbounds PQ.a.e[i] = PQ.p0[i]
         @inbounds PQ.v.e[i] = PQ.q0[i]

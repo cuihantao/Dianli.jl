@@ -34,7 +34,7 @@ Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:serial}}) whe
     end
 end
 
-Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:threads}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
     Threads.@threads for i = 1:PV.n
         @inbounds PV.a.e[i] = -PV.p0[i]
         @inbounds PV.v.e[i] = -PV.q[i]
@@ -53,7 +53,7 @@ Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:serial}
     end
 end
 
-Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:threads}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
     Threads.@threads for i = 1:Slack.n
         @inbounds Slack.a.e[i] = -Slack.p[i]
         @inbounds Slack.v.e[i] = -Slack.q[i]

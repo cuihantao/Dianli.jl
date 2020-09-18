@@ -15,7 +15,7 @@ Base.@propagate_inbounds function g_update!(shunt::Shunt{T}, ::Type{Val{:serial}
     end
 end
 
-Base.@propagate_inbounds function g_update!(shunt::Shunt{T}, ::Type{Val{:threads}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(shunt::Shunt{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
     Threads.@threads for i = 1:shunt.n
         @inbounds shunt.a.e[i] = shunt.v[i] ^2 * shunt.g[i]
         @inbounds shunt.v.e[i] = -shunt.v[i] ^2 * shunt.b[i]

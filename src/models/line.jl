@@ -37,7 +37,7 @@ Base.@propagate_inbounds function g_update!(line::Line{T}, ::Type{Val{:serial}})
     end
 end
 
-Base.@propagate_inbounds function g_update!(line::Line{T}, ::Type{Val{:threads}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(line::Line{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
     Threads.@threads for i = 1:line.n
         @inbounds line.a1.e[i] = (line.v1[i] * line.v1[i] * (line.gh[i] + line.ghk[i]) / line.tap[i] ^ 2  -
                                   line.v1[i] * line.v2[i] * (line.ghk[i] * cos(line.a1[i] - line.a2[i] - line.phi[i]) +
