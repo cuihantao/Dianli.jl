@@ -3,6 +3,13 @@ uuid = "d08873cf-a47e-4b69-9395-6fab01a89815"
 authors = ["Hantao Cui <cuihantao@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+Andes = "93a26e3f-343a-4ab9-b467-a68c67574964"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
 [compat]
 julia = "1"
 
