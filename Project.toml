@@ -11,6 +11,7 @@ PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
+PyCall = "1.91"
 Andes = "0.1"
 julia = "1"
 
