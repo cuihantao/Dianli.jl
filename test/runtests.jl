@@ -1,6 +1,7 @@
 using Dian
 using Test
 
-@testset "Dian.jl" begin
-    # Write your tests here.
-end
+using Andes, NLsolve
+
+include("test_pfsol.jl")
+
