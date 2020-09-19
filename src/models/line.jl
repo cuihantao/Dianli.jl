@@ -14,6 +14,8 @@ Base.@kwdef struct Line{T} <: Model{T}
     a2::ExtAlgeb{T}
     v1::ExtAlgeb{T}
     v2::ExtAlgeb{T}
+
+    triplets::Triplets{T, Int64}
 end
 
 
@@ -71,3 +73,6 @@ function set_v!(line::Line{T}, y::Vector{T}) where T <: AbstractFloat
     setval!(line.v2, y)
     nothing
 end
+
+
+alloc_triplets(::Type{Line{T}}, n::N) where {T <: AbstractFloat, N <: Integer} = Triplets{T, N}(16n)
