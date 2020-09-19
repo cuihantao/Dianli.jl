@@ -17,5 +17,14 @@
         @time sol = nlsolve(nr_cb_serial!(jss, Val{:serial}), y0);
         @test maximum(abs.(sol.zero - ss.dae.y)) < 1e-6 
 
+        @time sol = nlsolve(nr_cb_serial!(jss, Val{:threaded}), y0);
+        @test maximum(abs.(sol.zero - ss.dae.y)) < 1e-6 
+
+        @time sol = nlsolve(nr_cb_threaded!(jss, Val{:serial}), y0);
+        @test maximum(abs.(sol.zero - ss.dae.y)) < 1e-6 
+
+        @time sol = nlsolve(nr_cb_threaded!(jss, Val{:threaded}), y0);
+        @test maximum(abs.(sol.zero - ss.dae.y)) < 1e-6 
+
     end
 end
