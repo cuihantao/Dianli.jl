@@ -7,11 +7,11 @@ using PyCall: PyObject
 using SparseArrays: SparseMatrixCSC, sparse
 
 import Base: convert
-import ..Models: set_v!, collect_g!
+import ..Models: set_v!, collect_g!, add_triplets!
 
 export System
 export make_instance, convert
-export clear_g!, collect_g!, set_v!, YMatrix
+export clear_g!, collect_g!, set_v!, add_triplets!, YMatrix
 export sg_update!, pg_update!
 
 Base.@kwdef struct System{T}
@@ -23,15 +23,42 @@ Base.@kwdef struct System{T}
     Shunt::Shunt{T}
 
     dae::DAE{T}
+
+    triplets::Triplets{T, Int64}
+    triplets_init::Triplets{T, Int64}
+
+    model_instances::Vector{Model{T}} = []
 end
 
 function System{T}(ss::PyObject) where {T<:AbstractFloat}
-    models = [
-        make_instance(ty, ss[name])
-        for (ty, name) in zip(System{T}.types, fieldnames(System))
-    ]
-    System{T}(models...)
+
+    # add all models first
+    models = Dict{Symbol, Any}()
+
+    for (ty, name) in zip(System{T}.types, fieldnames(System))
+        if ty <: Model
+            models[name] = make_instance(ty, ss[name])
+        end
+    end
+    # Note: IMPORTANT!!
+    #   The order of models in `models::Dict` is random!!
+    
+    model_instances = collect(values(models))
+    
+    # then merge triplets
+    t1 = merge_triplets(model_instances...)
+    t2 = merge_triplets(model_instances...)  # same as `t1` on different memory
+    models[:triplets] = t1
+    models[:triplets_init] = t2
+
+    # add `dae` last
+    models[:dae] = make_instance(DAE{T}, ss[:dae])
+    models[:model_instances] = model_instances
+
+    System{T}(; models...)
 end
+
+System(ss::PyObject) = System{Float64}(ss)
 
 function make_instance(
     ty::Type{T},
@@ -46,12 +73,29 @@ function make_instance(
     return mdl
 end
 
+"""Make a DAE instance."""
 function make_instance(
     ty::Type{T},
     model::PyObject,
 ) where {T<:DAE{N}} where {N<:AbstractFloat}
-    objects = Dict(f => model[f] for f in fieldnames(ty))
+
+    objects = Dict{Symbol, Any}()
+    for (ftype, f) in zip(ty.types, fieldnames(ty))
+        (ftype <: SparseMatrixCSC) ? continue : nothing
+        objects[f] = model[f]
+    end
+
     ty(; objects...)
+end
+
+"""
+Make an empty Triplets instance for System.
+"""
+function make_instance(
+    ty::Type{M},
+    model::PyObject,
+) where {M<:Triplets{T, N}} where {T<:AbstractFloat, N<:Integer}
+    Triplets{T, N}(0)
 end
 
 function clear_g!(dae::DAE{T}) where {T<:AbstractFloat}
@@ -175,6 +219,7 @@ Model-parallel g_update
 """
 function pg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
 
+    # TODO: replace with `model_instances`
     models = [jss.PQ, jss.PV, jss.Slack, jss.Line, jss.Shunt]
 
     Threads.@threads for model in models
@@ -182,4 +227,63 @@ function pg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat
     end
 end
 
+"""
+Put values in the `vals` of model triplets
+"""
+function add_triplets!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    @inbounds add_triplets!(jss.PQ, tflag)
+    @inbounds add_triplets!(jss.PV, tflag)
+    @inbounds add_triplets!(jss.Slack, tflag)
+    @inbounds add_triplets!(jss.Line, tflag)
+    @inbounds add_triplets!(jss.Shunt, tflag)
+    
+    # reset values first (include constant jacobians)
+    for i in 1:length(jss.triplets.vals)
+        @inbounds jss.triplets.vals[i] = jss.triplets_init.vals[i]
+    end
+
+    # collect values
+    for m in jss.model_instances
+        for (i, addr) = enumerate(m.triplets.addr[1]:m.triplets.addr[2])
+            jss.triplets.vals[addr] = m.triplets.vals[i]
+        end
+    end
+
 end
+
+"""Merge model triplets into System."""
+function merge_triplets(models...) 
+    count::Int64 = 0
+
+    for m in models
+        @assert hasproperty(m, :triplets)
+        count += length(m.triplets.rows)
+    end
+
+    rows = zeros(Int64, count)
+    cols = zeros(Int64, count)
+    vals = zeros(Float64, count)
+    
+    pos::Int64 = 1
+    for m in models
+        tpl = m.triplets
+        if tpl.n <= 0
+            continue
+        end
+
+        tpl.addr[1] = pos
+        for (row, col, val) in zip(tpl.rows, tpl.cols, tpl.vals)
+            rows[pos] = row
+            cols[pos] = col
+            vals[pos] = val  # also merges constant jacobian elements
+            pos += 1
+        end
+        tpl.addr[2] = pos - 1
+    end
+
+    Triplets{Float64, Int64}(count, rows, cols, vals, [1, pos-1])
+end
+
+end  # end of `PowerSystem` module
+
+

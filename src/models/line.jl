@@ -205,7 +205,7 @@ Base.@propagate_inbounds function store_triplets!(line::Line{T}) where {T<:Abstr
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     line::Line{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
@@ -358,7 +358,7 @@ Base.@propagate_inbounds function push_triplets!(
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     line::Line{T},
     ::Type{Val{:threaded}},
 ) where {T<:AbstractFloat}

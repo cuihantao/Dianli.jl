@@ -148,7 +148,7 @@ Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractF
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     pv::PV{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
@@ -170,7 +170,7 @@ Base.@propagate_inbounds function push_triplets!(
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     pv::PV{T},
     ::Type{Val{:threaded}},
 ) where {T<:AbstractFloat}
@@ -211,7 +211,7 @@ Base.@propagate_inbounds function store_triplets!(slack::Slack{T}) where {T<:Abs
     end
 end
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     slack::Slack{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
@@ -232,7 +232,7 @@ Base.@propagate_inbounds function push_triplets!(
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     slack::Slack{T},
     ::Type{Val{:threaded}},
 ) where {T<:AbstractFloat}

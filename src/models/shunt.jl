@@ -65,7 +65,7 @@ Base.@propagate_inbounds function store_triplets!(shunt::Shunt{T}) where {T<:Abs
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     shunt::Shunt{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
@@ -81,7 +81,7 @@ Base.@propagate_inbounds function push_triplets!(
 end
 
 
-Base.@propagate_inbounds function push_triplets!(
+Base.@propagate_inbounds function add_triplets!(
     shunt::Shunt{T},
     ::Type{Val{:threaded}},
 ) where {T<:AbstractFloat}

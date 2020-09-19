@@ -1,8 +1,10 @@
 module BasicTypes
 
 using PyCall: PyObject
+using SparseArrays: SparseMatrixCSC, sparse
 
 import Base: convert
+import SparseArrays: sparse
 
 export Component, VComponent, VAComponent
 export Param, IntParam, ExtParam
@@ -78,8 +80,9 @@ convert(::Type{T}, var::PyObject) where {T<:ExtAlgeb} = T(var)
 
 #= DAE Arrays =#
 Base.@kwdef struct DAE{T}
-    y::Vector{T}
-    g::Vector{T}
+    y::Vector{T} = []
+    g::Vector{T} = []
+    gy::SparseMatrixCSC{T} = sparse(zeros(Int64, 0), zeros(Int64, 0), zeros(T, 0))
 end
 
 Base.@inline function addval!(v::ExtAlgeb{T}, dae::DAE{T}) where {T<:AbstractFloat}
@@ -101,12 +104,17 @@ Base.@kwdef struct Triplets{T,N}
     rows::Vector{N} = []
     cols::Vector{N} = []
     vals::Vector{T} = []
+
+    addr::Vector{N} = []
 end
 
 
 function Triplets{T,N}(n::N) where {T<:AbstractFloat,N<:Integer}
-    Triplets{T,N}(n, zeros(T, n), zeros(T, n), zeros(T, n))
+    Triplets{T,N}(n, zeros(T, n), zeros(T, n), zeros(T, n), [0, 0])
 end
 
+function sparse(tpl::Triplets{T, N}, m::N, n::N) where {T <: AbstractFloat, N<:Integer}
+    sparse(tpl.rows, tpl.cols, tpl.vals, m, n)
+end
 
 end  # module ends

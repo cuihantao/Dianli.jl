@@ -5,7 +5,7 @@ using ..Dian: THREAD_MODES
 
 export Model, Bus, PQ, PV, Slack, Line, Shunt
 export g_update!, collect_g!, set_v!
-export alloc_triplets, store_triplets!, push_triplets!
+export alloc_triplets, store_triplets!, add_triplets!
 
 abstract type Model{T} end
 
