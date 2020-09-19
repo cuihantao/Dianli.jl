@@ -9,7 +9,7 @@ Base.@kwdef struct PV{T} <: Model{T}
     q::ExtAlgeb{T}
     p::ExtAlgeb{T}
 
-    triplets::Triplets{T, Int64}
+    triplets::Triplets{T,Int64}
 end
 
 
@@ -26,11 +26,14 @@ Base.@kwdef struct Slack{T} <: Model{T}
     q::ExtAlgeb{T}
     p::ExtAlgeb{T}
 
-    triplets::Triplets{T, Int64}
+    triplets::Triplets{T,Int64}
 end
 
 
-Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:serial}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(
+    PV::PV{T},
+    ::Type{Val{:serial}},
+) where {T<:AbstractFloat}
     @simd for i = 1:PV.n
         @inbounds PV.a.e[i] = -PV.p[i]
         @inbounds PV.v.e[i] = -PV.q[i]
@@ -40,7 +43,10 @@ Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:serial}}) whe
 end
 
 
-Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(
+    PV::PV{T},
+    ::Type{Val{:threaded}},
+) where {T<:AbstractFloat}
     Threads.@threads for i = 1:PV.n
         @inbounds PV.a.e[i] = -PV.p[i]
         @inbounds PV.v.e[i] = -PV.q[i]
@@ -50,7 +56,10 @@ Base.@propagate_inbounds function g_update!(PV::PV{T}, ::Type{Val{:threaded}}) w
 end
 
 
-Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:serial}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(
+    Slack::Slack{T},
+    ::Type{Val{:serial}},
+) where {T<:AbstractFloat}
     @simd for i = 1:Slack.n
         @inbounds Slack.a.e[i] = -Slack.p[i]
         @inbounds Slack.v.e[i] = -Slack.q[i]
@@ -60,7 +69,10 @@ Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:serial}
 end
 
 
-Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
+Base.@propagate_inbounds function g_update!(
+    Slack::Slack{T},
+    ::Type{Val{:threaded}},
+) where {T<:AbstractFloat}
     Threads.@threads for i = 1:Slack.n
         @inbounds Slack.a.e[i] = -Slack.p[i]
         @inbounds Slack.v.e[i] = -Slack.q[i]
@@ -70,7 +82,7 @@ Base.@propagate_inbounds function g_update!(Slack::Slack{T}, ::Type{Val{:threade
 end
 
 
-function collect_g!(pv::PV{T}, dae::DAE{T}) where T <: AbstractFloat
+function collect_g!(pv::PV{T}, dae::DAE{T}) where {T<:AbstractFloat}
     addval!(pv.a, dae)
     addval!(pv.v, dae)
     addval!(pv.q, dae)
@@ -79,7 +91,7 @@ function collect_g!(pv::PV{T}, dae::DAE{T}) where T <: AbstractFloat
 end
 
 
-function collect_g!(slack::Slack{T}, dae::DAE{T}) where T <: AbstractFloat
+function collect_g!(slack::Slack{T}, dae::DAE{T}) where {T<:AbstractFloat}
     addval!(slack.a, dae)
     addval!(slack.v, dae)
     addval!(slack.q, dae)
@@ -88,7 +100,7 @@ function collect_g!(slack::Slack{T}, dae::DAE{T}) where T <: AbstractFloat
 end
 
 
-function set_v!(pv::PV{T}, y::Vector{T}) where T <: AbstractFloat
+function set_v!(pv::PV{T}, y::Vector{T}) where {T<:AbstractFloat}
     setval!(pv.a, y)
     setval!(pv.v, y)
     setval!(pv.q, y)
@@ -97,7 +109,7 @@ function set_v!(pv::PV{T}, y::Vector{T}) where T <: AbstractFloat
 end
 
 
-function set_v!(slack::Slack{T}, y::Vector{T}) where T <: AbstractFloat
+function set_v!(slack::Slack{T}, y::Vector{T}) where {T<:AbstractFloat}
     setval!(slack.a, y)
     setval!(slack.v, y)
     setval!(slack.q, y)
@@ -106,112 +118,136 @@ function set_v!(slack::Slack{T}, y::Vector{T}) where T <: AbstractFloat
 end
 
 
-alloc_triplets(::Type{PV{T}}, n::N) where {T <: AbstractFloat, N <: Integer} = Triplets{T, N}(4n)
+alloc_triplets(::Type{PV{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Triplets{T,N}(4n)
 
 
-alloc_triplets(::Type{Slack{T}}, n::N) where {T <: AbstractFloat, N <: Integer} = Triplets{T, N}(4n)
+alloc_triplets(::Type{Slack{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
+    Triplets{T,N}(4n)
 
 
-Base.@propagate_inbounds function push_triplets!(pv::PV{T}, ::Type{Val{:serial}}) where T <: AbstractFloat
+Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractFloat}
     ndev = pv.n
     @simd for i = 1:ndev
         #  d resP / dp
-        @inbounds pv.triplets.rows[i] = pv.a.a[i]        
-        @inbounds pv.triplets.cols[i] = pv.p.a[i]        
-        @inbounds pv.triplets.vals[i] = -1        
+        @inbounds pv.triplets.rows[i] = pv.a.a[i]
+        @inbounds pv.triplets.cols[i] = pv.p.a[i]
 
         # d resQ / dq
-        @inbounds pv.triplets.rows[ndev + i] = pv.v.a[i]        
-        @inbounds pv.triplets.cols[ndev + i] = pv.q.a[i]        
-        @inbounds pv.triplets.vals[ndev + i] = -1        
+        @inbounds pv.triplets.rows[ndev+i] = pv.v.a[i]
+        @inbounds pv.triplets.cols[ndev+i] = pv.q.a[i]
 
         # d Qbal / dv
-        @inbounds pv.triplets.rows[2ndev + i] = pv.q.a[i]        
-        @inbounds pv.triplets.cols[2ndev + i] = pv.v.a[i]        
-        @inbounds pv.triplets.vals[2ndev + i] = -1        
+        @inbounds pv.triplets.rows[2ndev+i] = pv.q.a[i]
+        @inbounds pv.triplets.cols[2ndev+i] = pv.v.a[i]
 
         # d Pbal / dp
-        @inbounds pv.triplets.rows[3ndev + i] = pv.p.a[i]        
-        @inbounds pv.triplets.cols[3ndev + i] = pv.p.a[i]        
-        @inbounds pv.triplets.vals[3ndev + i] = -1        
+        @inbounds pv.triplets.rows[3ndev+i] = pv.p.a[i]
+        @inbounds pv.triplets.cols[3ndev+i] = pv.p.a[i]
 
     end
 end
 
 
-Base.@propagate_inbounds function push_triplets!(pv::PV{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
+Base.@propagate_inbounds function push_triplets!(
+    pv::PV{T},
+    ::Type{Val{:serial}},
+) where {T<:AbstractFloat}
+    ndev = pv.n
+    @simd for i = 1:ndev
+        #  d resP / dp
+        @inbounds pv.triplets.vals[i] = -1
+
+        # d resQ / dq
+        @inbounds pv.triplets.vals[ndev+i] = -1
+
+        # d Qbal / dv
+        @inbounds pv.triplets.vals[2ndev+i] = -1
+
+        # d Pbal / dp
+        @inbounds pv.triplets.vals[3ndev+i] = -1
+
+    end
+end
+
+
+Base.@propagate_inbounds function push_triplets!(
+    pv::PV{T},
+    ::Type{Val{:threaded}},
+) where {T<:AbstractFloat}
     ndev = pv.n
     Threads.@threads for i = 1:ndev
         #  d resP / dp
-        @inbounds pv.triplets.rows[i] = pv.a.a[i]        
-        @inbounds pv.triplets.cols[i] = pv.p.a[i]        
-        @inbounds pv.triplets.vals[i] = -1        
+        @inbounds pv.triplets.vals[i] = -1
 
         # d resQ / dq
-        @inbounds pv.triplets.rows[ndev + i] = pv.v.a[i]        
-        @inbounds pv.triplets.cols[ndev + i] = pv.q.a[i]        
-        @inbounds pv.triplets.vals[ndev + i] = -1        
+        @inbounds pv.triplets.vals[ndev+i] = -1
 
         # d Qbal / dv
-        @inbounds pv.triplets.rows[2ndev + i] = pv.q.a[i]        
-        @inbounds pv.triplets.cols[2ndev + i] = pv.v.a[i]        
-        @inbounds pv.triplets.vals[2ndev + i] = -1        
+        @inbounds pv.triplets.vals[2ndev+i] = -1
 
         # d Pbal / dp
-        @inbounds pv.triplets.rows[3ndev + i] = pv.p.a[i]        
-        @inbounds pv.triplets.cols[3ndev + i] = pv.p.a[i]        
-        @inbounds pv.triplets.vals[3ndev + i] = -1        
+        @inbounds pv.triplets.vals[3ndev+i] = -1
     end
 end
 
-
-Base.@propagate_inbounds function push_triplets!(slack::Slack{T}, ::Type{Val{:serial}}) where T <: AbstractFloat
+Base.@propagate_inbounds function store_triplets!(slack::Slack{T}) where {T<:AbstractFloat}
     ndev = slack.n
     @simd for i = 1:ndev
         #  d resP / dp
         @inbounds slack.triplets.rows[i] = slack.a.a[i]
         @inbounds slack.triplets.cols[i] = slack.p.a[i]
-        @inbounds slack.triplets.vals[i] = -1        
 
         #  d resQ / dq
-        @inbounds slack.triplets.rows[ndev + i] = slack.v.a[i]        
-        @inbounds slack.triplets.cols[ndev + i] = slack.q.a[i]        
-        @inbounds slack.triplets.vals[ndev + i] = -1        
+        @inbounds slack.triplets.rows[ndev+i] = slack.v.a[i]
+        @inbounds slack.triplets.cols[ndev+i] = slack.q.a[i]
 
         #  d Qbal / dv
-        @inbounds slack.triplets.rows[2ndev + i] = slack.q.a[i]        
-        @inbounds slack.triplets.cols[2ndev + i] = slack.v.a[i]        
-        @inbounds slack.triplets.vals[2ndev + i] = -1        
+        @inbounds slack.triplets.rows[2ndev+i] = slack.q.a[i]
+        @inbounds slack.triplets.cols[2ndev+i] = slack.v.a[i]
 
         #  d Qbal / dv
-        @inbounds slack.triplets.rows[3ndev + i] = slack.p.a[i]        
-        @inbounds slack.triplets.cols[3ndev + i] = slack.a.a[i]        
-        @inbounds slack.triplets.vals[3ndev + i] = -1        
+        @inbounds slack.triplets.rows[3ndev+i] = slack.p.a[i]
+        @inbounds slack.triplets.cols[3ndev+i] = slack.a.a[i]
+    end
+end
+
+Base.@propagate_inbounds function push_triplets!(
+    slack::Slack{T},
+    ::Type{Val{:serial}},
+) where {T<:AbstractFloat}
+    ndev = slack.n
+    @simd for i = 1:ndev
+        #  d resP / dp
+        @inbounds slack.triplets.vals[i] = -1
+
+        #  d resQ / dq
+        @inbounds slack.triplets.vals[ndev+i] = -1
+
+        #  d Qbal / dv
+        @inbounds slack.triplets.vals[2ndev+i] = -1
+
+        #  d Qbal / dv
+        @inbounds slack.triplets.vals[3ndev+i] = -1
     end
 end
 
 
-Base.@propagate_inbounds function push_triplets!(slack::Slack{T}, ::Type{Val{:threaded}}) where T <: AbstractFloat
+Base.@propagate_inbounds function push_triplets!(
+    slack::Slack{T},
+    ::Type{Val{:threaded}},
+) where {T<:AbstractFloat}
     ndev = slack.n
     Threads.@threads for i = 1:ndev
         #  d resP / da
-        @inbounds slack.triplets.rows[i] = slack.a.a[i]        
-        @inbounds slack.triplets.cols[i] = slack.p.a[i]        
-        @inbounds slack.triplets.vals[i] = -1        
+        @inbounds slack.triplets.vals[i] = -1
 
         #  d resQ / dv
-        @inbounds slack.triplets.rows[ndev + i] = slack.v.a[i]        
-        @inbounds slack.triplets.cols[ndev + i] = slack.q.a[i]        
-        @inbounds slack.triplets.vals[ndev + i] = -1        
+        @inbounds slack.triplets.vals[ndev+i] = -1
 
         #  d Qbal / dv
-        @inbounds slack.triplets.rows[2ndev + i] = slack.q.a[i]        
-        @inbounds slack.triplets.cols[2ndev + i] = slack.v.a[i]        
-        @inbounds slack.triplets.vals[2ndev + i] = -1        
+        @inbounds slack.triplets.vals[2ndev+i] = -1
 
         #  d Qbal / dv
-        @inbounds slack.triplets.rows[3ndev + i] = slack.p.a[i]        
-        @inbounds slack.triplets.cols[3ndev + i] = slack.a.a[i]        
-        @inbounds slack.triplets.vals[3ndev + i] = -1        
+        @inbounds slack.triplets.vals[3ndev+i] = -1
     end
 end

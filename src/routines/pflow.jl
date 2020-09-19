@@ -3,7 +3,11 @@ Update NR equations for a given system.
 
 Models are called in serial.
 """
-function nr_serial(sys::System{T}, y::Vector{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_serial(
+    sys::System{T},
+    y::Vector{T},
+    mode::THREAD_MODES,
+) where {T<:AbstractFloat}
     set_v!(sys, y)
     sg_update!(sys, mode)
     collect_g!(sys)
@@ -16,7 +20,12 @@ Update NR equations for a given system in place.
 
 Models are called in serial.
 """
-function nr_serial!(sys::System{T}, G::Vector{T}, y::Vector{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_serial!(
+    sys::System{T},
+    G::Vector{T},
+    y::Vector{T},
+    mode::THREAD_MODES,
+) where {T<:AbstractFloat}
     set_v!(sys, y)
     sg_update!(sys, mode)
     collect_g!(sys)
@@ -30,7 +39,11 @@ Update NR equations for a given system.
 
 Models equations are called in parallel.
 """
-function nr_threaded(sys::System{T}, y::Vector{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_threaded(
+    sys::System{T},
+    y::Vector{T},
+    mode::THREAD_MODES,
+) where {T<:AbstractFloat}
     set_v!(sys, y)
     pg_update!(sys, mode)
     collect_g!(sys)
@@ -44,7 +57,12 @@ Update NR equations for a given system in place.
 
 Models equations are called in parallel.
 """
-function nr_threaded!(sys::System{T}, G::Vector{T}, y::Vector{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_threaded!(
+    sys::System{T},
+    G::Vector{T},
+    y::Vector{T},
+    mode::THREAD_MODES,
+) where {T<:AbstractFloat}
     set_v!(sys, y)
     pg_update!(sys, mode)
     collect_g!(sys)
@@ -58,7 +76,7 @@ Newton-Raphson with serial equation calls to each model.
 
 Argument `mode` specifies if calls within each model should be serial or threaded.
 """
-function nr_cb_serial!(jss::System{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_cb_serial!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
     (G::AbstractVector, y::AbstractVector) -> nr_serial!(jss, G, y, mode)
 end
 
@@ -68,6 +86,6 @@ Newton-Raphson with serial equation calls to each model.
 
 Argument `mode` specifies if calls within each model should be serial or threaded.
 """
-function nr_cb_threaded!(jss::System{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+function nr_cb_threaded!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
     (G::AbstractVector, y::AbstractVector) -> nr_threaded!(jss, G, y, mode)
 end

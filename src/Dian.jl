@@ -9,7 +9,7 @@ using PyCall: PyObject
 
 import Base: convert
 
-THREAD_MODES = Union{Type{Val{:serial}}, Type{Val{:threaded}}}
+THREAD_MODES = Union{Type{Val{:serial}},Type{Val{:threaded}}}
 
 include("basics.jl")
 include("models/models.jl")
