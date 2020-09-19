@@ -26,6 +26,20 @@ end
 
 
 """
+Update NR equations for a given system.
+
+Models equations are called in parallel.
+"""
+function nr_threaded(sys::System{T}, y::Vector{T}, mode::THREAD_MODES) where {T <: AbstractFloat}
+    set_v!(sys, y)
+    pg_update!(sys, mode)
+    collect_g!(sys)
+    sys.dae.g
+end
+
+
+
+"""
 Update NR equations for a given system in place.
 
 Models equations are called in parallel.
@@ -35,7 +49,9 @@ function nr_threaded!(sys::System{T}, G::Vector{T}, y::Vector{T}, mode::THREAD_M
     pg_update!(sys, mode)
     collect_g!(sys)
     G .= sys.dae.g
+    nothing
 end
+
 
 """
 Newton-Raphson with serial equation calls to each model.

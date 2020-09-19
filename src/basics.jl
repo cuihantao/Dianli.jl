@@ -6,9 +6,8 @@ import Base: convert
 
 export Component, VComponent, VAComponent
 export Param, IntParam, ExtParam
-export Variable, IntVariable, ExtVariable
-export IntAlgeb, ExtAlgeb
-export Model, DAE
+export Variable, IntVariable, ExtVariable, IntAlgeb, ExtAlgeb
+export Model, DAE, Triplets
 export addval!, setval!
 export convert
 
@@ -84,10 +83,25 @@ Base.@inline function addval!(v::ExtAlgeb{T}, dae::DAE{T}) where T <: AbstractFl
     end
 end
 
+
 Base.@inline function setval!(v::ExtAlgeb{T}, y::Vector{T}) where T <: AbstractFloat
     for i = 1:length(v.a)
         @inbounds v.v[i] = y[v.a[i]]
     end
 end
 
+
+Base.@kwdef struct Triplets{T, N}
+    n::N  = 0
+    rows::Vector{N} = []
+    cols::Vector{N} = []
+    vals::Vector{T} = []
 end
+
+
+function Triplets{T, N}(n::N) where {T <: AbstractFloat, N <: Integer}
+    Triplets{T, N}(n, zeros(T, n), zeros(T, n), zeros(T, n))
+end
+
+
+end  # module ends

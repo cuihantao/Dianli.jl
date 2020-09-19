@@ -30,7 +30,14 @@ function System{T}(ss::PyObject) where T <: AbstractFloat
     System{T}(models...)
 end
 
-function make_instance(ty::Type{T}, model::PyObject) where T <: Union{Model, DAE}
+function make_instance(ty::Type{T}, model::PyObject) where T <: Model{N} where N <: AbstractFloat
+    objects = Dict(f => model[f] for f in fieldnames(ty))
+    objects[:triplets] = alloc_triplets(ty, objects[:n])
+
+    ty(; objects...)
+end
+
+function make_instance(ty::Type{T}, model::PyObject) where T <: DAE{N} where N <: AbstractFloat
     objects = Dict(f => model[f] for f in fieldnames(ty))
     ty(; objects...)
 end
@@ -128,17 +135,20 @@ end
 Model-serial g_update
 """
 function sg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
-    g_update!(jss.PQ, tflag)
-    g_update!(jss.PV, tflag)
-    g_update!(jss.Slack, tflag)
-    g_update!(jss.Line, tflag)
-    g_update!(jss.Shunt, tflag)
+    @inbounds g_update!(jss.PQ, tflag)
+    @inbounds g_update!(jss.PV, tflag)
+    @inbounds g_update!(jss.Slack, tflag)
+    @inbounds g_update!(jss.Line, tflag)
+    @inbounds g_update!(jss.Shunt, tflag)
 end
 
 """
 Model-parallel g_update
 """
-function pg_update!(models::Array{Model{T}}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+function pg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    
+    models = [jss.PQ, jss.PV, jss.Slack, jss.Line, jss.Shunt];
+
     Threads.@threads for model in models
         @inbounds g_update!(model, tflag)
     end

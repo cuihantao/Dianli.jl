@@ -21,6 +21,7 @@ using .Routines
 using .BasicTypes
 
 export System
+export nr_serial, nr_threaded
 export nr_serial!, nr_threaded!
 export nr_cb_serial!, nr_cb_threaded!
 export convert
