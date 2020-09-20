@@ -21,9 +21,10 @@ using .Routines
 using .BasicTypes
 
 export System
+export THREAD_MODES
 export nr_serial, nr_threaded
 export nr_serial!, nr_threaded!
-export nr_cb_serial!, nr_cb_threaded!
+export nr_jac_serial!, nr_jac_threaded!
 export convert
 
 end

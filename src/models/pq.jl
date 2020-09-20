@@ -51,3 +51,5 @@ alloc_triplets(::Type{PQ{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Triple
 Base.@inline store_triplets!(::PQ{T}) where {T<:AbstractFloat} = nothing
 
 Base.@inline add_triplets!(::PQ{T}, ::THREAD_MODES) where {T<:AbstractFloat} = nothing
+
+Base.@inline upload_triplets!(::PQ{T}, ::THREAD_MODES) where {T<:AbstractFloat} = nothing

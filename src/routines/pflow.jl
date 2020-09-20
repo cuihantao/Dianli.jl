@@ -71,12 +71,24 @@ function nr_threaded!(
 end
 
 
+function nr_jac_serial!(
+    sys::System{T},
+    J,
+    y::Vector{T},
+    mode::THREAD_MODES,
+) where {T<:AbstractFloat}
+    set_v!(sys, y)
+    j_update!(sys, mode)
+    J .= sys.dae.gy
+    nothing
+end
+
 """
 Newton-Raphson with serial equation calls to each model.
 
 Argument `mode` specifies if calls within each model should be serial or threaded.
 """
-function nr_cb_serial!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
+function nr_serial!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
     (G::AbstractVector, y::AbstractVector) -> nr_serial!(jss, G, y, mode)
 end
 
@@ -86,6 +98,11 @@ Newton-Raphson with serial equation calls to each model.
 
 Argument `mode` specifies if calls within each model should be serial or threaded.
 """
-function nr_cb_threaded!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
+function nr_threaded!(jss::System{T}, mode::THREAD_MODES) where {T<:AbstractFloat}
     (G::AbstractVector, y::AbstractVector) -> nr_threaded!(jss, G, y, mode)
+end
+
+
+function nr_jac_serial!(jss::System{T}, mode::THREAD_MODES) where T<: AbstractFloat
+    (J, x) -> nr_jac_serial!(jss, J, x, mode)
 end

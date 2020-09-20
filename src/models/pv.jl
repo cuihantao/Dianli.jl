@@ -251,3 +251,4 @@ Base.@propagate_inbounds function add_triplets!(
         @inbounds slack.triplets.vals[3ndev+i] = -1
     end
 end
+
