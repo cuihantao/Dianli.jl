@@ -118,7 +118,7 @@ function set_v!(slack::Slack{T}, y::Vector{T}) where {T<:AbstractFloat}
 end
 
 
-alloc_triplets(::Type{PV{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Triplets{T,N}(4n)
+alloc_triplets(::Type{PV{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Triplets{T,N}(5n)
 
 
 alloc_triplets(::Type{Slack{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
@@ -144,6 +144,10 @@ Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractF
         @inbounds pv.triplets.rows[3ndev+i] = pv.p.a[i]
         @inbounds pv.triplets.cols[3ndev+i] = pv.p.a[i]
 
+        # d q / dv avoid singularity
+        @inbounds pv.triplets.rows[4ndev+i] = pv.q.a[i]
+        @inbounds pv.triplets.cols[4ndev+i] = pv.q.a[i]
+        @inbounds pv.triplets.vals[4ndev+i] = 1e-12
     end
 end
 

@@ -14,6 +14,8 @@ alloc_triplets(ty::T, n::N) where {T<:Type{Model},N<:Integer} =
 
 """
 Upload triplet values from models to System. Serial.
+
+Overwrites existing values in System triplets.
 """
 Base.@propagate_inbounds function upload_triplets!(
     model::Model{T},
@@ -26,12 +28,14 @@ Base.@propagate_inbounds function upload_triplets!(
     start_pos = model.triplets.addr[1]
 
     @simd for i = 1:span
-        @inbounds tpl.vals[start_pos + i - 1] += model.triplets.vals[i]
+        @inbounds tpl.vals[start_pos + i - 1] = model.triplets.vals[i]
     end
 end
 
 """
 Upload triplet values from models to System. Threaded.
+
+Overwrites existing values in System triplets.
 """
 Base.@propagate_inbounds function upload_triplets!(
     model::Model{T},

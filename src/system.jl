@@ -276,11 +276,6 @@ function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     @inbounds add_triplets!(jss.Slack, tflag)
     @inbounds add_triplets!(jss.Line, tflag)
     @inbounds add_triplets!(jss.Shunt, tflag)
-    
-    # reset values first (include constant jacobians)
-    for i in 1:length(jss.triplets.vals)
-        @inbounds jss.triplets.vals[i] = jss.triplets_init.vals[i]
-    end
 
     # collect values into `System.triplets.vals`
     @inbounds upload_triplets!(jss.PQ, jss.triplets, tflag)
