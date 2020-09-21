@@ -122,7 +122,7 @@ alloc_triplets(::Type{PV{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Triple
 
 
 alloc_triplets(::Type{Slack{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
-    Triplets{T,N}(4n)
+    Triplets{T,N}(6n)
 
 
 Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractFloat}
@@ -158,16 +158,9 @@ Base.@propagate_inbounds function add_triplets!(
 ) where {T<:AbstractFloat}
     ndev = pv.n
     @simd for i = 1:ndev
-        #  d resP / dp
         @inbounds pv.triplets.vals[i] = -1
-
-        # d resQ / dq
         @inbounds pv.triplets.vals[ndev+i] = -1
-
-        # d Qbal / dv
         @inbounds pv.triplets.vals[2ndev+i] = -1
-
-        # d Pbal / dp
         @inbounds pv.triplets.vals[3ndev+i] = -1
 
     end
@@ -180,16 +173,9 @@ Base.@propagate_inbounds function add_triplets!(
 ) where {T<:AbstractFloat}
     ndev = pv.n
     Threads.@threads for i = 1:ndev
-        #  d resP / dp
         @inbounds pv.triplets.vals[i] = -1
-
-        # d resQ / dq
         @inbounds pv.triplets.vals[ndev+i] = -1
-
-        # d Qbal / dv
         @inbounds pv.triplets.vals[2ndev+i] = -1
-
-        # d Pbal / dp
         @inbounds pv.triplets.vals[3ndev+i] = -1
     end
 end
@@ -212,6 +198,14 @@ Base.@propagate_inbounds function store_triplets!(slack::Slack{T}) where {T<:Abs
         #  d Qbal / dv
         @inbounds slack.triplets.rows[3ndev+i] = slack.p.a[i]
         @inbounds slack.triplets.cols[3ndev+i] = slack.a.a[i]
+
+        @inbounds slack.triplets.rows[4ndev+i] = slack.p.a[i]
+        @inbounds slack.triplets.cols[4ndev+i] = slack.p.a[i]
+        @inbounds slack.triplets.vals[4ndev+i] = 1e-12
+        
+        @inbounds slack.triplets.rows[5ndev+i] = slack.q.a[i]
+        @inbounds slack.triplets.cols[5ndev+i] = slack.q.a[i]
+        @inbounds slack.triplets.vals[5ndev+i] = 1e-12
     end
 end
 

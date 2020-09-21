@@ -48,7 +48,7 @@ Base.@propagate_inbounds function upload_triplets!(
     start_pos = model.triplets.addr[1]
 
     Threads.@threads for i = 1:span
-        @inbounds tpl.vals[start_pos + i - 1] += model.triplets.vals[i]
+        @inbounds tpl.vals[start_pos + i - 1] = model.triplets.vals[i]
     end
 end
 

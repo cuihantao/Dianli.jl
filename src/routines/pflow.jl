@@ -106,3 +106,31 @@ end
 function nr_jac_serial!(jss::System{T}, mode::THREAD_MODES) where T<: AbstractFloat
     (J, x) -> nr_jac_serial!(jss, J, x, mode)
 end
+
+
+function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:AbstractFloat
+    err::Float64 = 1
+    niter::Int64 = 0
+    max_iter::Int64 = 20
+    tol::Float64 = 1e-5
+    sol = Vector(y0)
+    inc = similar(y0)
+    
+    nr_serial(jss, sol, MODE)
+    j_update!(jss, MODE)    
+    F = lu(jss.dae.gy)
+    
+    while (niter < max_iter) && (err > tol)
+        if niter > 0
+            nr_serial(jss, sol, MODE)
+            j_update!(jss, MODE)
+            F = lu!(F, jss.dae.gy)
+        end
+        inc .= F \ jss.dae.g
+
+        err = maximum(abs.(inc))
+        sol .-= inc
+        niter += 1
+    end
+    return sol
+end

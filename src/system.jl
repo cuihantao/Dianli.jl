@@ -271,6 +271,7 @@ Put values in the `vals` of model triplets and then to that of System.
 Type-stable and allocation-free.
 """
 function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    @inbounds add_triplets!(jss.Bus, tflag)
     @inbounds add_triplets!(jss.PQ, tflag)
     @inbounds add_triplets!(jss.PV, tflag)
     @inbounds add_triplets!(jss.Slack, tflag)
@@ -278,6 +279,7 @@ function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     @inbounds add_triplets!(jss.Shunt, tflag)
 
     # collect values into `System.triplets.vals`
+    @inbounds upload_triplets!(jss.Bus, jss.triplets, tflag)
     @inbounds upload_triplets!(jss.PQ, jss.triplets, tflag)
     @inbounds upload_triplets!(jss.PV, jss.triplets, tflag)
     @inbounds upload_triplets!(jss.Slack, jss.triplets, tflag)

@@ -24,7 +24,7 @@ export System
 export THREAD_MODES
 export nr_serial, nr_threaded
 export nr_serial!, nr_threaded!
-export nr_jac_serial!, nr_jac_threaded!
+export nr_jac_serial!, nr_jac_threaded!, run_nr
 export convert
 
 end
