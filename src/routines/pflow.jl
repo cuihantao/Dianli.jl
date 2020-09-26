@@ -107,7 +107,9 @@ function nr_jac_serial!(jss::System{T}, mode::THREAD_MODES) where T<: AbstractFl
     (J, x) -> nr_jac_serial!(jss, J, x, mode)
 end
 
-
+"""
+Run standard Newton-Raphson power flow
+""" 
 function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:AbstractFloat
     err::Float64 = 1
     niter::Int64 = 0
@@ -132,5 +134,18 @@ function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:Abst
         sol .-= inc
         niter += 1
     end
-    return sol
+    return sol, err
+end
+
+"""
+Solve Newton power flow using NLsolve.nlsolve.
+"""
+function nlsolve_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES; kwargs...) where T<:AbstractFloat
+    j_update!(jss, MODE);
+    J0 = sparse(jss.dae.gy);
+    g0 = Vector(jss.dae.g);
+    df = OnceDifferentiable(nr_serial!(jss, MODE),
+                            nr_jac_serial!(jss, MODE),
+                            y0, g0, J0);
+    sol = nlsolve(df, y0; kwargs...)
 end

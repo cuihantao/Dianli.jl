@@ -11,7 +11,7 @@ import ..Models: set_v!, collect_g!, add_triplets!
 
 export System
 export make_instance, convert
-export clear_g!, collect_g!, set_v!, YMatrix
+export clear_g!, collect_g!, set_v!, Ymatrix
 export sg_update!, pg_update!, j_update!
 
 Base.@kwdef struct System{T}
@@ -42,9 +42,9 @@ function System{T}(ss::PyObject) where {T<:AbstractFloat}
     end
     # Note: IMPORTANT!!
     #   The order of models in `models::Dict` is random!!
-    
+
     model_instances = collect(values(models))
-    
+
     # then merge triplets
     t1 = merge_triplets(model_instances...)
     t2 = merge_triplets(model_instances...)  # same as `t1` on different memory
@@ -93,7 +93,7 @@ function make_instance(
     ty(; objects...)
 end
 
-"""
+"""r
 Make an empty Triplets instance for System.
 """
 function make_instance(
@@ -140,11 +140,10 @@ function Ymatrix(line::Line{T}, bus::Bus{T}) where {T<:AbstractFloat}
     y1 = line.gh + line.bh * 1im
     y2 = line.gk + line.bk * 1im
     y12 = line.ghk + line.bhk * 1im
-    itap2 = 1 ./ line.tap ./ line.tap
-    itap = 1 ./ line.tap .* exp.(1im * line.phi)
-    itapconj = conj.(itap)
+    itapc = line.itap .* exp.(1im * line.phi)
+    itapconj = conj.(itapc)
 
-    Ymatrix!(line, rows, cols, vals, y1, y2, y12, itap, itap2, itapconj)
+    Ymatrix!(line, rows, cols, vals, y1, y2, y12, itapc, line.itap2, itapconj)
 
     sparse(rows, cols, vals, bus.n, bus.n)
 end
@@ -160,7 +159,7 @@ Base.@inline function Ymatrix!(
     y1,
     y2,
     y12,
-    itap,
+    itapc,  # itap * e^(j phi)
     itap2,
     itapconj,
 ) where {T<:AbstractFloat}
@@ -176,7 +175,7 @@ Base.@inline function Ymatrix!(
 
         @inbounds rows[2line.n+i] = line.a2.a[i]
         @inbounds cols[2line.n+i] = line.a1.a[i]
-        @inbounds vals[2line.n+i] = -y12[i] * itap[i]
+        @inbounds vals[2line.n+i] = -y12[i] * itapc[i]
 
         @inbounds rows[3line.n+i] = line.a2.a[i]
         @inbounds cols[3line.n+i] = line.a2.a[i]
@@ -200,7 +199,7 @@ function calc_Yinj!(
 
     Sbus .= Vbus .* conj.(Ymat * Vbus)
 
-    @simd for i = 1:bus.n
+    Threads.@threads for i = 1:bus.n
         @inbounds Pvec[i] = real(Sbus[i])
         @inbounds Qvec[1] = imag(Sbus[i])
     end
@@ -243,7 +242,7 @@ function j_update_unstable!(jss::System{T}, tflag::THREAD_MODES) where {T<:Abstr
     @inbounds add_triplets!(jss.Slack, tflag)
     @inbounds add_triplets!(jss.Line, tflag)
     @inbounds add_triplets!(jss.Shunt, tflag)
-    
+
     # reset values first (include constant jacobians)
     for i in 1:length(jss.triplets.vals)
         @inbounds jss.triplets.vals[i] = jss.triplets_init.vals[i]
@@ -292,11 +291,9 @@ function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     # build sparse matrix from Triplets and update `gy` in-place
     jss.dae.gy .= sparse(stpl.rows, stpl.cols, stpl.vals)
 
-    #= 
+    #=
     # An alternative approach that seems slower
-    fill zeros
     fill!(jss.dae.gy, 0.0)
-    
     @simd for i in 1:length(stpl.rows)
         jss.dae.gy[stpl.rows[i], stpl.cols[i]] += stpl.vals[i]
     end
@@ -306,7 +303,7 @@ function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
 end
 
 """Merge model triplets into System."""
-function merge_triplets(models...) 
+function merge_triplets(models...)
     count::Int64 = 0
 
     for m in models
@@ -317,7 +314,7 @@ function merge_triplets(models...)
     rows = zeros(Int64, count)
     cols = zeros(Int64, count)
     vals = zeros(Float64, count)
-    
+
     pos::Int64 = 1
     for m in models
         tpl = m.triplets
@@ -339,4 +336,3 @@ function merge_triplets(models...)
 end
 
 end  # end of `PowerSystem` module
-
