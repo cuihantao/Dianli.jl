@@ -23,7 +23,7 @@ Base.@propagate_inbounds function upload_triplets!(
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
     if model.triplets.n == 0  return end
-    
+
     span = model.triplets.addr[2] - model.triplets.addr[1] + 1
     start_pos = model.triplets.addr[1]
 
@@ -43,7 +43,7 @@ Base.@propagate_inbounds function upload_triplets!(
     ::Type{Val{:threaded}},
 ) where {T<:AbstractFloat}
     if model.triplets.n == 0  return end
-    
+
     span = model.triplets.addr[2] - model.triplets.addr[1] + 1
     start_pos = model.triplets.addr[1]
 
