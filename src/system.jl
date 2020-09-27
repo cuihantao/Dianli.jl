@@ -222,12 +222,8 @@ end
 Model-parallel g_update
 """
 function pg_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
-
-    # TODO: replace with `model_instances`
-    models = [jss.PQ, jss.PV, jss.Slack, jss.Line, jss.Shunt]
-
-    Threads.@threads for model in models
-        @inbounds g_update!(model, tflag)
+    Threads.@threads for i in 1:length(jss.model_instances)
+        @inbounds g_update!(jss.model_instances[i], tflag)
     end
 end
 
@@ -269,7 +265,7 @@ Put values in the `vals` of model triplets and then to that of System.
 
 Type-stable and allocation-free.
 """
-function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+function sj_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     @inbounds add_triplets!(jss.Bus, tflag)
     @inbounds add_triplets!(jss.PQ, tflag)
     @inbounds add_triplets!(jss.PV, tflag)
@@ -285,22 +281,53 @@ function j_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     @inbounds upload_triplets!(jss.Line, jss.triplets, tflag)
     @inbounds upload_triplets!(jss.Shunt, jss.triplets, tflag)
 
-    # set values to sparse matrix
-    stpl::Triplets{T} = jss.triplets
-
     # build sparse matrix from Triplets and update `gy` in-place
-    jss.dae.gy .= sparse(stpl.rows, stpl.cols, stpl.vals)
-
-    #=
-    # An alternative approach that seems slower
-    fill!(jss.dae.gy, 0.0)
-    @simd for i in 1:length(stpl.rows)
-        jss.dae.gy[stpl.rows[i], stpl.cols[i]] += stpl.vals[i]
-    end
-    =#
-
+    jss.dae.gy .= sparse(jss.triplets.rows,
+                         jss.triplets.cols,
+                         jss.triplets.vals)
     return jss.dae.gy
 end
+
+function pj_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    @inbounds Threads.@threads for i in 1:length(jss.model_instances)
+        add_triplets!(jss.model_instances[i], tflag)
+        println(Threads.threadid())
+        # collect values into `System.triplets.vals`
+    end
+
+    # collect values into `System.triplets.vals`
+    @inbounds upload_triplets!(jss.Bus, jss.triplets, tflag)
+    @inbounds upload_triplets!(jss.PQ, jss.triplets, tflag)
+    @inbounds upload_triplets!(jss.PV, jss.triplets, tflag)
+    @inbounds upload_triplets!(jss.Slack, jss.triplets, tflag)
+    @inbounds upload_triplets!(jss.Line, jss.triplets, tflag)
+    @inbounds upload_triplets!(jss.Shunt, jss.triplets, tflag)
+
+    # build sparse matrix from Triplets and update `gy` in-place
+    jss.dae.gy .= sparse(jss.triplets.rows,
+                         jss.triplets.cols,
+                         jss.triplets.vals)
+    return jss.dae.gy
+end
+
+j_update!(jss::System{T}, tflag::THREAD_MODES) where {T <: AbstractFloat} = sj_update!(jss, tflag)
+
+function testp!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    @inbounds Threads.@threads for i in eachindex(jss.model_instances)
+        add_triplets!(jss.model_instances[i], tflag)
+        # collect values into `System.triplets.vals`
+    end
+end
+
+function tests!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
+    @inbounds add_triplets!(jss.Bus, tflag)
+    @inbounds add_triplets!(jss.PQ, tflag)
+    @inbounds add_triplets!(jss.PV, tflag)
+    @inbounds add_triplets!(jss.Slack, tflag)
+    @inbounds add_triplets!(jss.Line, tflag)
+    @inbounds add_triplets!(jss.Shunt, tflag)
+end
+
 
 """Merge model triplets into System."""
 function merge_triplets(models...)
