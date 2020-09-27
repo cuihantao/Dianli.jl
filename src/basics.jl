@@ -82,7 +82,7 @@ convert(::Type{T}, var::PyObject) where {T<:ExtAlgeb} = T(var)
 Base.@kwdef struct DAE{T}
     y::Vector{T} = []
     g::Vector{T} = []
-    gy::SparseMatrixCSC{T} = sparse(zeros(Int64, 0), zeros(Int64, 0), zeros(T, 0))
+    gy::SparseMatrixCSC{T, Int64} = sparse(zeros(Int64, 0), zeros(Int64, 0), zeros(T, 0))
 end
 
 Base.@inline function addval!(v::ExtAlgeb{T}, dae::DAE{T}) where {T<:AbstractFloat}
