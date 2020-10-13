@@ -12,3 +12,5 @@ alloc_triplets(::Type{Bus{T}}, n::N) where {T<:AbstractFloat,N<:Integer} = Tripl
 Base.@inline store_triplets!(::Bus{T}) where {T<:AbstractFloat} = nothing
 
 Base.@inline add_triplets!(::Bus{T}, ::THREAD_MODES) where {T<:AbstractFloat} = nothing
+
+Base.@inline g_update!(::Bus{T}, ::THREAD_MODES) where {T<:AbstractFloat} = nothing

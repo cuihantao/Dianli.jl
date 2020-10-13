@@ -291,7 +291,6 @@ end
 function pj_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat}
     @inbounds Threads.@threads for i in 1:length(jss.model_instances)
         add_triplets!(jss.model_instances[i], tflag)
-        println(Threads.threadid())
         # collect values into `System.triplets.vals`
     end
 
