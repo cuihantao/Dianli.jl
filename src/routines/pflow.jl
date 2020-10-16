@@ -109,19 +109,19 @@ end
 
 """
 Run standard Newton-Raphson power flow
-""" 
+"""
 function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:AbstractFloat
     err::Float64 = 1
     niter::Int64 = 0
     max_iter::Int64 = 20
-    tol::Float64 = 1e-5
+    tol::Float64 = 1e-8
     sol = Vector(y0)
     inc = similar(y0)
-    
+
     nr_serial(jss, sol, MODE)
-    j_update!(jss, MODE)    
+    j_update!(jss, MODE)
     F = lu(jss.dae.gy)
-    
+
     while (niter < max_iter) && (err > tol)
         if niter > 0
             nr_serial(jss, sol, MODE)
@@ -134,7 +134,7 @@ function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:Abst
         sol .-= inc
         niter += 1
     end
-    return sol, err
+    return sol, err, niter
 end
 
 """
