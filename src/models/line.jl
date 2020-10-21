@@ -24,45 +24,49 @@ Base.@propagate_inbounds function g_update!(
     line::Line{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:line.n
-        @inbounds line.a1.e[i] = (
+    @inbounds @simd for i = 1:line.n
+        line.a1.e[i] = (
             line.v1[i] * line.v1[i] * (line.gh[i] + line.ghk[i]) * line.itap2[i] -
             line.v1[i] *
             line.v2[i] *
+            line.itap[i] *
             (
                 line.ghk[i] * cos(line.a1[i] - line.a2[i] - line.phi[i]) +
                 line.bhk[i] * sin(line.a1[i] - line.a2[i] - line.phi[i])
-            ) * line.itap[i]
+            )
         )
 
-        @inbounds line.v1.e[i] = (
+        line.v1.e[i] = (
             -line.v1[i]^2 * (line.bh[i] + line.bhk[i]) * line.itap2[i] -
             line.v1[i] *
             line.v2[i] *
+            line.itap[i] *
             (
                 line.ghk[i] * sin(line.a1[i] - line.a2[i] - line.phi[i]) -
                 line.bhk[i] * cos(line.a1[i] - line.a2[i] - line.phi[i])
-            ) * line.itap[i]
+            )
         )
 
-        @inbounds line.a2.e[i] = (
+        line.a2.e[i] = (
             line.v2[i]^2 * (line.gh[i] + line.ghk[i]) -
             line.v1[i] *
             line.v2[i] *
+            line.itap[i] *
             (
                 line.ghk[i] * cos(line.a1[i] - line.a2[i] - line.phi[i]) -
                 line.bhk[i] * sin(line.a1[i] - line.a2[i] - line.phi[i])
-            ) * line.itap[i]
+            )
         )
 
-        @inbounds line.v2.e[i] = (
+        line.v2.e[i] = (
             -line.v2[i]^2 * (line.bh[i] + line.bhk[i]) +
             line.v1[i] *
             line.v2[i] *
+            line.itap[i] *
             (
                 line.ghk[i] * sin(line.a1[i] - line.a2[i] - line.phi[i]) +
                 line.bhk[i] * cos(line.a1[i] - line.a2[i] - line.phi[i])
-            ) * line.itap[i]
+            )
         )
     end
 end
