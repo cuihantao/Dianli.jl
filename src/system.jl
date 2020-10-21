@@ -1,5 +1,6 @@
 module PowerSystem
 
+using LoopVectorization
 using ..BasicTypes
 using ..Models
 using ..Dian: THREAD_MODES
@@ -193,7 +194,7 @@ function calc_Yinj!(
     Pvec::Vector{T},
     Qvec::Vector{T},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:bus.n
+    @avx for i = 1:bus.n
         @inbounds Vbus[i] = bus.v[i] * exp(1im * bus.a[i])
     end
 

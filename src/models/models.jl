@@ -2,6 +2,7 @@ module Models
 
 using ..BasicTypes
 using ..Dian: THREAD_MODES
+using LoopVectorization
 
 export Model, Bus, PQ, PV, Slack, Line, Shunt
 export g_update!, collect_g!, set_v!
@@ -27,7 +28,7 @@ Base.@propagate_inbounds function upload_triplets!(
     span = model.triplets.addr[2] - model.triplets.addr[1] + 1
     start_pos = model.triplets.addr[1]
 
-    @simd for i = 1:span
+    @avx for i = 1:span
         @inbounds tpl.vals[start_pos + i - 1] = model.triplets.vals[i]
     end
 end

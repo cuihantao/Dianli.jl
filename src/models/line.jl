@@ -24,7 +24,7 @@ Base.@propagate_inbounds function g_update!(
     line::Line{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @inbounds @simd for i = 1:line.n
+    @inbounds @avx for i = 1:line.n
         line.a1.e[i] = (
             line.v1[i] * line.v1[i] * (line.gh[i] + line.ghk[i]) * line.itap2[i] -
             line.v1[i] *
@@ -140,7 +140,7 @@ alloc_triplets(::Type{Line{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
 
 Base.@propagate_inbounds function store_triplets!(line::Line{T}) where {T<:AbstractFloat}
     ndev = line.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         # d a1 / d a1
         @inbounds line.triplets.rows[0ndev+i] = line.a1.a[i]
         @inbounds line.triplets.cols[0ndev+i] = line.a1.a[i]
@@ -215,7 +215,7 @@ Base.@propagate_inbounds function add_triplets!(
 ) where {T<:AbstractFloat}
     ndev = line.n
 
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         @inbounds line.triplets.vals[0ndev+i] =
             -line.itap[i] *
             line.v1[i] *

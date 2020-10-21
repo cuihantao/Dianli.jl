@@ -34,7 +34,7 @@ Base.@propagate_inbounds function g_update!(
     PV::PV{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:PV.n
+    @avx for i = 1:PV.n
         @inbounds PV.a.e[i] = -PV.p[i]
         @inbounds PV.v.e[i] = -PV.q[i]
         @inbounds PV.q.e[i] = PV.v0[i] - PV.v[i]
@@ -60,7 +60,7 @@ Base.@propagate_inbounds function g_update!(
     Slack::Slack{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:Slack.n
+    @avx for i = 1:Slack.n
         @inbounds Slack.a.e[i] = -Slack.p[i]
         @inbounds Slack.v.e[i] = -Slack.q[i]
         @inbounds Slack.q.e[i] = Slack.v0[i] - Slack.v[i]
@@ -127,7 +127,7 @@ alloc_triplets(::Type{Slack{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
 
 Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractFloat}
     ndev = pv.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         #  d resP / dp
         @inbounds pv.triplets.rows[i] = pv.a.a[i]
         @inbounds pv.triplets.cols[i] = pv.p.a[i]
@@ -157,7 +157,7 @@ Base.@propagate_inbounds function add_triplets!(
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
     ndev = pv.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         @inbounds pv.triplets.vals[i] = -1
         @inbounds pv.triplets.vals[ndev+i] = -1
         @inbounds pv.triplets.vals[2ndev+i] = -1
@@ -182,7 +182,7 @@ end
 
 Base.@propagate_inbounds function store_triplets!(slack::Slack{T}) where {T<:AbstractFloat}
     ndev = slack.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         #  d resP / dp
         @inbounds slack.triplets.rows[i] = slack.a.a[i]
         @inbounds slack.triplets.cols[i] = slack.p.a[i]
@@ -202,7 +202,7 @@ Base.@propagate_inbounds function store_triplets!(slack::Slack{T}) where {T<:Abs
         @inbounds slack.triplets.rows[4ndev+i] = slack.p.a[i]
         @inbounds slack.triplets.cols[4ndev+i] = slack.p.a[i]
         @inbounds slack.triplets.vals[4ndev+i] = 1e-12
-        
+
         @inbounds slack.triplets.rows[5ndev+i] = slack.q.a[i]
         @inbounds slack.triplets.cols[5ndev+i] = slack.q.a[i]
         @inbounds slack.triplets.vals[5ndev+i] = 1e-12
@@ -214,7 +214,7 @@ Base.@propagate_inbounds function add_triplets!(
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
     ndev = slack.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         #  d resP / dp
         @inbounds slack.triplets.vals[i] = -1
 

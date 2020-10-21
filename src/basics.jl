@@ -2,6 +2,7 @@ module BasicTypes
 
 using PyCall: PyObject
 using SparseArrays: SparseMatrixCSC, sparse
+using LoopVectorization
 
 import Base: convert
 import SparseArrays: sparse
@@ -17,6 +18,10 @@ abstract type Component{T} <: AbstractVector{T} end
 
 abstract type VComponent{T} <: Component{T} end
 
+# support `LoopVectorization`
+LoopVectorization.check_args(::VComponent{T}) where {T} = LoopVectorization.check_type(T)
+
+Base.pointer(v::VComponent) = pointer(v.v)
 Base.size(VC::VComponent) = Base.size(VC.v)
 Base.iterate(VC::VComponent) = Base.iterate(VC.v)
 Base.iterate(VC::VComponent, iter) = Base.iterate(VC.v, iter)

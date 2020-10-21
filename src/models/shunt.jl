@@ -15,7 +15,7 @@ Base.@propagate_inbounds function g_update!(
     shunt::Shunt{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:shunt.n
+    @avx for i = 1:shunt.n
         @inbounds shunt.a.e[i] = shunt.v[i]^2 * shunt.g[i]
         @inbounds shunt.v.e[i] = -shunt.v[i]^2 * shunt.b[i]
     end
@@ -53,7 +53,7 @@ Base.@inline alloc_triplets(::Type{Shunt{T}}, n::N) where {T<:AbstractFloat,N<:I
 
 Base.@propagate_inbounds function store_triplets!(shunt::Shunt{T}) where {T<:AbstractFloat}
     ndev = shunt.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         #  d resP / da
         @inbounds shunt.triplets.rows[i] = shunt.a.a[i]
         @inbounds shunt.triplets.cols[i] = shunt.a.a[i]
@@ -70,7 +70,7 @@ Base.@propagate_inbounds function add_triplets!(
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
     ndev = shunt.n
-    @simd for i = 1:ndev
+    @avx for i = 1:ndev
         #  d resP / da
         @inbounds shunt.triplets.vals[i] = 2 * shunt.v[i] * shunt.g[i]
 

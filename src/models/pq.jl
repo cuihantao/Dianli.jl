@@ -14,7 +14,7 @@ Base.@propagate_inbounds function g_update!(
     PQ::PQ{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @simd for i = 1:PQ.n
+    @avx for i = 1:PQ.n
         @inbounds PQ.a.e[i] = PQ.p0[i]
         @inbounds PQ.v.e[i] = PQ.q0[i]
     end
