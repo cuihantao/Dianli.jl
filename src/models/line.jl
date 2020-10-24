@@ -24,7 +24,7 @@ Base.@propagate_inbounds function g_update!(
     line::Line{T},
     ::Type{Val{:serial}},
 ) where {T<:AbstractFloat}
-    @inbounds @avx for i = 1:line.n
+    @avx for i = 1:line.n
         line.a1.e[i] = (
             line.v1[i] * line.v1[i] * (line.gh[i] + line.ghk[i]) * line.itap2[i] -
             line.v1[i] *
