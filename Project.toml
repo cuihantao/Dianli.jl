@@ -11,6 +11,7 @@ LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+VectorizationBase = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
 
 [compat]
 Andes = "0.1"
