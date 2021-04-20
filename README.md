@@ -1,4 +1,4 @@
-# Dian
+# Dian.jl (电)
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cuihantao.github.io/Dian.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cuihantao.github.io/Dian.jl/dev)
