@@ -1,12 +1,12 @@
 ```@meta
-CurrentModule = Dian
+CurrentModule = Dianli
 ```
 
-# Dian
+# Dianli
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [Dian]
+Modules = [Dianli]
 ```

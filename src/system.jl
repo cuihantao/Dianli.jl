@@ -3,7 +3,7 @@ module PowerSystem
 using LoopVectorization
 using ..BasicTypes
 using ..Models
-using ..Dian: THREAD_MODES
+using ..Dianli: THREAD_MODES
 using PyCall: PyObject
 using SparseArrays: SparseMatrixCSC, sparse
 
@@ -38,7 +38,7 @@ function System{T}(ss::PyObject) where {T<:AbstractFloat}
 
     for (ty, name) in zip(System{T}.types, fieldnames(System))
         if ty <: Model
-            models[name] = make_instance(ty, ss[name])
+            models[name] = make_instance(ty, getproperty(ss, name))
         end
     end
     # Note: IMPORTANT!!
@@ -53,7 +53,7 @@ function System{T}(ss::PyObject) where {T<:AbstractFloat}
     models[:triplets_init] = t2
 
     # add `dae` last
-    dae = make_instance(DAE{T}, ss[:dae])
+    dae = make_instance(DAE{T}, ss.dae)
 
     models[:dae] = dae
     models[:model_instances] = model_instances
@@ -67,7 +67,7 @@ function make_instance(
     ty::Type{T},
     model::PyObject,
 ) where {T<:Model{N}} where {N<:AbstractFloat}
-    objects = Dict(f => model[f] for f in fieldnames(ty))
+    objects = Dict(f => getproperty(model, f) for f in fieldnames(ty))
     objects[:triplets] = alloc_triplets(ty, objects[:n])
 
     mdl = ty(; objects...)
@@ -85,7 +85,7 @@ function make_instance(
     objects = Dict{Symbol, Any}()
     for (ftype, f) in zip(ty.types, fieldnames(ty))
         (ftype <: SparseMatrixCSC) ? continue : nothing
-        objects[f] = model[f]
+        objects[f] = getproperty(model, f)
     end
 
     n = length(objects[:y])

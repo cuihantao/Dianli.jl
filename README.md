@@ -1,9 +1,9 @@
-# Dian.jl (电)
+# Dianli.jl (电)
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cuihantao.github.io/Dian.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cuihantao.github.io/Dian.jl/dev)
-[![Build Status](https://travis-ci.com/cuihantao/Dian.jl.svg?branch=master)](https://travis-ci.com/cuihantao/Dian.jl)
-[![Coverage](https://codecov.io/gh/cuihantao/Dian.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/cuihantao/Dian.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cuihantao.github.io/Dianli.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cuihantao.github.io/Dianli.jl/dev)
+[![Build Status](https://travis-ci.com/cuihantao/Dianli.jl.svg?branch=master)](https://travis-ci.com/cuihantao/Dianli.jl)
+[![Coverage](https://codecov.io/gh/cuihantao/Dianli.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/cuihantao/Dianli.jl)
 
 Source code for letter "Effective Parallelism for Equation and Jacobian Evaluation in Power Flow Calculation". Citation:
 

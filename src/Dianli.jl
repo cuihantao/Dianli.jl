@@ -1,6 +1,6 @@
 __precompile__()
 
-module Dian
+module Dianli
 
 using SparseArrays
 using NLsolve

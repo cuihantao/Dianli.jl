@@ -1,14 +1,14 @@
-using Dian
+using Dianli
 using Documenter
 
 makedocs(;
-    modules=[Dian],
+    modules=[Dianli],
     authors="Hantao Cui <cuihantao@gmail.com> and contributors",
-    repo="https://github.com/cuihantao/Dian.jl/blob/{commit}{path}#L{line}",
-    sitename="Dian.jl",
+    repo="https://github.com/cuihantao/Dianli.jl/blob/{commit}{path}#L{line}",
+    sitename="Dianli.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://cuihantao.github.io/Dian.jl",
+        canonical="https://cuihantao.github.io/Dianli.jl",
         assets=String[],
     ),
     pages=[
@@ -17,5 +17,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/cuihantao/Dian.jl",
+    repo="github.com/cuihantao/Dianli.jl",
 )

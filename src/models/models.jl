@@ -1,7 +1,7 @@
 module Models
 
 using ..BasicTypes
-using ..Dian: THREAD_MODES
+using ..Dianli: THREAD_MODES
 using LoopVectorization
 
 export Model, Bus, PQ, PV, Slack, Line, Shunt

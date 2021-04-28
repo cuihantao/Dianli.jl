@@ -1,4 +1,4 @@
-using Dian
+using Dianli
 using Test
 
 using Andes, NLsolve

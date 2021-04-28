@@ -1,7 +1,7 @@
 module Routines
 
 using ..PowerSystem
-using ..Dian: THREAD_MODES
+using ..Dianli: THREAD_MODES
 using SparseArrays: SparseMatrixCSC, sparse
 using LinearAlgebra
 using NLsolve: OnceDifferentiable, nlsolve
