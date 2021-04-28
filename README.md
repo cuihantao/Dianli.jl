@@ -1,4 +1,4 @@
-# Dianli.jl (电)
+# Dianli.jl (电力)
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cuihantao.github.io/Dianli.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cuihantao.github.io/Dianli.jl/dev)
