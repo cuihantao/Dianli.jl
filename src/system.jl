@@ -104,6 +104,9 @@ function make_instance(
     Triplets{T, N}(0)
 end
 
+"""
+Set the `g` array of a DAE object to zeros in place.
+"""
 function clear_g!(dae::DAE{T}) where {T<:AbstractFloat}
     dae.g .= 0.0
 end
@@ -113,6 +116,9 @@ function convert(ty::Type{T}, model::PyObject) where {T<:Union{Model,DAE}}
     ty(model)
 end
 
+"""
+Collect residual values into system DAE.
+"""
 function collect_g!(sys::System{T}) where {T<:AbstractFloat}
     clear_g!(sys.dae)
     collect_g!(sys.PQ, sys.dae)
@@ -122,6 +128,9 @@ function collect_g!(sys::System{T}) where {T<:AbstractFloat}
     collect_g!(sys.Shunt, sys.dae)
 end
 
+"""
+Set variable values from the input array `y`.
+"""
 function set_v!(sys::System{T}, y::Vector{T}) where {T<:AbstractFloat}
     set_v!(sys.PQ, y)
     set_v!(sys.PV, y)
@@ -185,6 +194,9 @@ Base.@inline function Ymatrix!(
     end
 end
 
+"""
+Calculate line injections based on admittance matrix.
+"""
 function calc_Yinj!(
     line::Line{T},
     bus::Bus{T},
