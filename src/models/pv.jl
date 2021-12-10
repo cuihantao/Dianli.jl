@@ -128,6 +128,7 @@ alloc_triplets(::Type{Slack{T}}, n::N) where {T<:AbstractFloat,N<:Integer} =
 Base.@propagate_inbounds function store_triplets!(pv::PV{T}) where {T<:AbstractFloat}
     ndev = pv.n
     @avx for i = 1:ndev
+
         #  d resP / dp
         @inbounds pv.triplets.rows[i] = pv.a.a[i]
         @inbounds pv.triplets.cols[i] = pv.p.a[i]

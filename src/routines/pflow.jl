@@ -120,13 +120,13 @@ function run_nr(jss::System{T}, y0::Vector{T}, MODE::THREAD_MODES) where T<:Abst
 
     nr_serial(jss, sol, MODE)
     j_update!(jss, MODE)
-    F = lu(jss.dae.gy)
+    F = KLU.lu(jss.dae.gy)
 
     while (niter < max_iter) && (err > tol)
         if niter > 0
             nr_serial(jss, sol, MODE)
             j_update!(jss, MODE)
-            F = lu!(F, jss.dae.gy)
+            F = KLU.lu!(F, jss.dae.gy)
         end
         inc .= F \ jss.dae.g
 

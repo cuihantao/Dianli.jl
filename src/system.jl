@@ -295,6 +295,7 @@ function sj_update!(jss::System{T}, tflag::THREAD_MODES) where {T<:AbstractFloat
     @inbounds upload_triplets!(jss.Shunt, jss.triplets, tflag)
 
     # build sparse matrix from Triplets and update `gy` in-place
+
     jss.dae.gy .= sparse(jss.triplets.rows,
                          jss.triplets.cols,
                          jss.triplets.vals)

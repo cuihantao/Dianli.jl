@@ -2,6 +2,7 @@ module Routines
 
 using ..PowerSystem
 using ..Dianli: THREAD_MODES
+using KLU
 using SparseArrays: SparseMatrixCSC, sparse
 using LinearAlgebra
 using NLsolve: OnceDifferentiable, nlsolve
