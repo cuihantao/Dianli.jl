@@ -7,7 +7,7 @@ for name in cases
     case_path = joinpath(mpc_dir, name)
     @testset "Testing $name" begin
 
-        ss = Dianli.Andes.py.load(case_path, no_output=true)
+        ss = Dianli.Andes.py.load(case_path, no_output=true, default_config=true)
         ss.PFlow.init()
 
         jss = System{Float64}(ss)
