@@ -3,6 +3,7 @@ __precompile__()
 module Dianli
 
 using SparseArrays
+using KLU
 using NLsolve
 using Andes
 using PyCall: PyObject
@@ -15,6 +16,7 @@ include("basics.jl")
 include("models/models.jl")
 include("system.jl")
 include("routines/routines.jl")
+include("utils/utils.jl")
 
 using .PowerSystem
 using .Routines
