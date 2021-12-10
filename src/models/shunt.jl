@@ -54,9 +54,9 @@ Base.@inline alloc_triplets(::Type{Shunt{T}}, n::N) where {T<:AbstractFloat,N<:I
 Base.@propagate_inbounds function store_triplets!(shunt::Shunt{T}) where {T<:AbstractFloat}
     ndev = shunt.n
     @avx for i = 1:ndev
-        #  d resP / da
+        #  d resP / dv
         @inbounds shunt.triplets.rows[i] = shunt.a.a[i]
-        @inbounds shunt.triplets.cols[i] = shunt.a.a[i]
+        @inbounds shunt.triplets.cols[i] = shunt.v.a[i]
 
         # d resQ / dv
         @inbounds shunt.triplets.rows[ndev+i] = shunt.v.a[i]
@@ -71,7 +71,7 @@ Base.@propagate_inbounds function add_triplets!(
 ) where {T<:AbstractFloat}
     ndev = shunt.n
     @avx for i = 1:ndev
-        #  d resP / da
+        #  d resP / dv
         @inbounds shunt.triplets.vals[i] = 2 * shunt.v[i] * shunt.g[i]
 
         # d resQ / dv
