@@ -206,18 +206,32 @@ function calc_Yinj!(
     Pvec::Vector{T},
     Qvec::Vector{T},
 ) where {T<:AbstractFloat}
-    @avx for i = 1:bus.n
-        @inbounds Vbus[i] = bus.v[i] * exp(1im * bus.a[i])
+    @fastmath @avx for i = 1:bus.n
+        Vbus[i] = bus.v[i] * exp(1im * bus.a[i])
     end
 
-    Sbus .= Vbus .* conj.(Ymat * Vbus)
+    calc_Yinj!(Ymat, Vbus, Sbus)
 
-    Threads.@threads for i = 1:bus.n
-        @inbounds Pvec[i] = real(Sbus[i])
-        @inbounds Qvec[1] = imag(Sbus[i])
+    @avx for i = 1:bus.n
+        Pvec[i] = real(Sbus[i])
+        Qvec[1] = imag(Sbus[i])
     end
 
     nothing
+end
+
+
+"""
+Calculate line injections based on admittance matrix.
+
+Given complex voltages are used.
+"""
+function calc_Yinj!(
+    Ymat::SparseMatrixCSC{Complex{T},Int64},
+    Vbus::Vector{Complex{T}},
+    Sbus::Vector{Complex{T}},
+) where {T<:AbstractFloat}
+    Sbus .= Vbus .* conj.(Ymat * Vbus)
 end
 
 """
