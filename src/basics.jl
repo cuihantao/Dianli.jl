@@ -4,6 +4,7 @@ using PyCall: PyObject
 using SparseArrays: SparseMatrixCSC, sparse
 using LoopVectorization
 using VectorizationBase
+using ArrayInterface
 
 import Base: convert
 import SparseArrays: sparse
@@ -20,7 +21,8 @@ abstract type Component{T} <: AbstractVector{T} end
 abstract type VComponent{T} <: Component{T} end
 
 # support `LoopVectorization`
-@inline VectorizationBase.memory_reference(::VComponent{T}) where {T} = VectorizationBase.memory_reference(T)
+VectorizationBase.memory_reference(v::VComponent{T}) where {T} = VectorizationBase.memory_reference(parent(v))
+LoopVectorization.check_args(::VComponent{T}) where {T} = LoopVectorization.check_type(T)
 
 Base.pointer(v::VComponent) = pointer(v.v)
 Base.size(VC::VComponent) = Base.size(VC.v)
@@ -39,6 +41,12 @@ Base.@propagate_inbounds function Base.setindex!(
     @boundscheck checkbounds(VC, i)
     VC.v[i] = v
 end
+
+Base.parent(v::VComponent) = v.v
+Base.unsafe_convert(::Type{Ptr{T}}, x::VComponent{T}) where {T} = Base.unsafe_convert(Ptr{T}, parent(x))
+Base.size(v::VComponent) = size(parent(v))
+Base.strides(v::VComponent) = strides(parent(v))
+# ArrayInterface.parent_type(::Type{VComponent{T}}) where {T} = A
 
 abstract type VAComponent{T} <: VComponent{T} end
 
