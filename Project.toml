@@ -16,9 +16,9 @@ VectorizationBase = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
 
 [compat]
 Andes = "0.1"
-BenchmarkTools = "1"
-NLsolve = "4"
-PyCall = "1.91, 1.93"
+BenchmarkTools = "^1"
+NLsolve = "^4"
+PyCall = "^1.91, 1.93"
 VectorizationBase = "0.15, 0.16, 0.17, 0.20"
 julia = "1"
 
