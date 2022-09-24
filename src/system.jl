@@ -14,6 +14,7 @@ export System
 export make_instance, convert
 export clear_g!, collect_g!, set_v!, Ymatrix
 export sg_update!, pg_update!, j_update!
+export calc_Yinj!
 
 Base.@kwdef struct System{T}
     Bus::Bus{T}
@@ -230,7 +231,7 @@ function calc_Yinj!(
     Ymat::SparseMatrixCSC{Complex{T},Int64},
     Vbus::Vector{Complex{T}},
     Sbus::Vector{Complex{T}},
-) where {T<:AbstractFloat}
+) where T
     Sbus .= Vbus .* conj.(Ymat * Vbus)
 end
 
