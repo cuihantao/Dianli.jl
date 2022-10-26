@@ -151,10 +151,10 @@ function Ymatrix(line::Line{T}, bus::Bus{T}) where {T<:AbstractFloat}
     y1 = line.gh + line.bh * 1im
     y2 = line.gk + line.bk * 1im
     y12 = line.ghk + line.bhk * 1im
-    itapc = line.itap .* exp.(1im * line.phi)
-    itapconj = conj.(itapc)
+    itapc = line.itap .* exp.(-1im * line.phi)   # 1 / (tap .* exp.(1im * phi)) = itap .* exp.(-1im * phi)
+    itapcconj = conj.(itapc)
 
-    Ymatrix!(line, rows, cols, vals, y1, y2, y12, itapc, line.itap2, itapconj)
+    Ymatrix!(line, rows, cols, vals, y1, y2, y12, itapc, line.itap2, itapcconj)
 
     sparse(rows, cols, vals, bus.n, bus.n)
 end
@@ -170,9 +170,9 @@ Base.@inline function Ymatrix!(
     y1,
     y2,
     y12,
-    itapc,  # itap * e^(j phi)
+    itapc,  # itap * e^(-j phi)
     itap2,
-    itapconj,
+    itapcconj,
 ) where {T<:AbstractFloat}
 
     Threads.@threads for i = 1:line.n
@@ -182,7 +182,7 @@ Base.@inline function Ymatrix!(
 
         @inbounds rows[line.n+i] = line.a1.a[i]
         @inbounds cols[line.n+i] = line.a2.a[i]
-        @inbounds vals[line.n+i] = -y12[i] * itapconj[i]
+        @inbounds vals[line.n+i] = -y12[i] * itapcconj[i]
 
         @inbounds rows[2line.n+i] = line.a2.a[i]
         @inbounds cols[2line.n+i] = line.a1.a[i]
